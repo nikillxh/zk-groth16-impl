@@ -36,7 +36,7 @@ impl Constraint {
 }
 
 impl R1CS {
-    pub fn init(witness: Vec<i64>, eqn_count: Option<usize>) -> R1CS {
+    pub fn blank(witness: Vec<i64>, eqn_count: Option<usize>) -> R1CS {
         let witnesses = witness.len();
         let eqn_count = eqn_count.unwrap_or(1);
         R1CS {
@@ -49,22 +49,22 @@ impl R1CS {
     pub fn new(constraints: Vec<Constraint>, witness: Vec<i64>) -> R1CS {
         let witnesses = witness.len();
         let eqn_count = constraints.len();
-        let mut L: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
-        let mut R: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
-        let mut O: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
+        let mut left: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
+        let mut right: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
+        let mut out: Vec<Vec<i64>> = vec![vec![0; witnesses]; eqn_count];
         let mut count: usize = 0;
 
         for constraint in constraints {
-            L[count][constraint.x.variable] = constraint.x.coeff;
-            R[count][constraint.y.variable] = constraint.y.coeff;
-            O[count][constraint.z.variable] = constraint.z.coeff;
+            left[count][constraint.x.variable] = constraint.x.coeff;
+            right[count][constraint.y.variable] = constraint.y.coeff;
+            out[count][constraint.z.variable] = constraint.z.coeff;
             count += 1;
         };
 
         Self {
-            l: L,
-            r: R,
-            o: O,
+            l: left,
+            r: right,
+            o: out,
         }
     }
 
