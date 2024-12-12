@@ -22,7 +22,6 @@ impl Element {
             coeff: coeff,
         }
     }
-
 }
 
 impl Constraint {

@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Mul, Sub};
 
 const MODULUS256: [u64; 4] = [
     0x2523648240000001,
@@ -74,8 +74,17 @@ impl FieldElement64 {
     pub fn value(&self) -> u64 {
         self.value
     }
-}
 
+    pub fn convert1D(matrix: &mut Vec<i64>) -> Vec<FieldElement64> {
+        matrix.iter().map(|&x| FieldElement64::new(x as u64)).collect()
+    }
+
+    pub fn convert2D(matrix: &mut Vec<Vec<i64>>) -> Vec<Vec<FieldElement64>> {
+        matrix.iter()
+        .map(|row| row.iter().map(|&x| FieldElement64::new(x as u64)).collect())
+        .collect()
+    }
+}
 
 impl FieldElement256 {
     pub fn new(mut value: [u64; 4]) -> Self {
@@ -187,6 +196,7 @@ impl FieldElement256 {
 
         FieldElement256::new(value)
     }
+    
 }
 
 impl Add for FieldElement64 {
@@ -197,3 +207,18 @@ impl Add for FieldElement64 {
     }
 }
 
+impl Mul for FieldElement64 {
+    type Output = Self;
+
+    fn multiply(self, rhs: Self) -> Self::Output {
+        self.multiply(rhs)
+    }
+}
+
+impl Sub for FieldElement64 {
+    type Output = Self;
+
+    fn subtract(self, rhs: Self) -> Self::Output {
+        self.subtract(rhs)
+    }
+}
