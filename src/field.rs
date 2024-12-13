@@ -1,17 +1,18 @@
 use std::ops::{Add, Mul, Sub};
+use rand::{RngCore, Rng};
 
 const MODULUS256: [u64; 4] = [
-    0x2523648240000001,
-    0xBA344D8000000008,
-    0x5A9320E033BA4E14,
-    0x1B9FEFFFFFFFFAAAB,
+    0xffffffffffffffff, // 0xFFFFFFFFFFFFFFFF
+    0xffffffffffffffff, // 0xFFFFFFFFFFFFFFFF
+    0xffffffffffffffff, // 0xFFFFFFFFFFFFFFFF
+    0xffffffffffffffff, // 0xFFFFFFFFFFFFFFFF
 ];
 
 pub struct FieldElement256 {
     value: [u64; 4],
 }
 
-const MODULUS64: u64 = 0xFFFFFFFFFFFFFFC5; 
+pub const MODULUS64: u64 = 0xFFFFFFFFFFFFFFC5; 
 
 pub struct FieldElement64 {
     value: u64,
@@ -65,7 +66,6 @@ impl FieldElement64 {
     }
 
     pub fn random() -> Self {
-        use rand::Rng;
         let mut rng = rand::thread_rng();
         let value = rng.gen::<u64>() % MODULUS64;
         FieldElement64 { value }
@@ -83,6 +83,30 @@ impl FieldElement64 {
         matrix.iter()
         .map(|row| row.iter().map(|&x| FieldElement64::new(x as u64)).collect())
         .collect()
+    }
+}
+
+impl Add for FieldElement64 {
+    type Output = Self;
+
+    fn add(self, addend: Self) -> Self::Output {
+        self.add(addend)
+    }
+}
+
+impl Mul for FieldElement64 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.multiply(rhs)
+    }
+}
+
+impl Sub for FieldElement64 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.subtract(rhs)
     }
 }
 
@@ -119,106 +143,99 @@ impl FieldElement256 {
     pub fn add(self, addend: FieldElement256) -> FieldElement256 {
         let mut result = [0u64; 4];
         let mut carry = 0;
-
+    
         for i in 0..4 {
-            let (sum, c1) = self.value[i].carrying_add(addend.value[i], carry);
-            result[i] = sum;
-            carry = c1;
+            let (sum, overflow1) = self.value[i].overflowing_add(addend.value[i]);
+            let (sum_with_carry, overflow2) = sum.overflowing_add(carry);
+    
+            result[i] = sum_with_carry;
+            carry = (overflow1 as u64) + (overflow2 as u64);
         }
-
+    
         FieldElement256::new(result)
     }
+    
 
-    pub fn subtract(self, subtrahend: FieldElement256) {
+    pub fn subtract(self, subtrahend: FieldElement256) -> FieldElement256 {
         let mut result = [0u64; 4];
         let mut borrow = 0;
-
+    
         for i in 0..4 {
-            let (diff, b1) = self.value[i].borrowing_sub(subtrahend.value[i], borrow);
+            let (diff, overflow) = self.value[i].overflowing_sub(subtrahend.value[i] + borrow);
             result[i] = diff;
-            borrow = b1;
+            borrow = overflow as u64;
         }
-
+    
         if borrow != 0 {
             let mut carry = 0;
             for i in 0..4 {
-                let (sum, c1) = result[i].carrying_add(MODULUS256[i], carry);
+                let (sum, overflow) = result[i].overflowing_add(MODULUS256[i] + carry);
                 result[i] = sum;
-                carry = c1;
+                carry = overflow as u64;
             }
         }
-
+    
         FieldElement256::new(result)
     }
-
+    
     pub fn multiply(self, multiplier: FieldElement256) -> FieldElement256 {
-        let mut result = [0u64; 4];
-
+        let mut result = [0u64; 8]; 
         for i in 0..4 {
             let mut carry = 0u64;
             for j in 0..4 {
-                let (low, high) = self.value[i].overflowing_mul(other.value[j]);
+                let (low, high) = self.value[i].overflowing_mul(multiplier.value[j]);
+                
                 let (res_low, c1) = result[i + j].overflowing_add(low);
-                let (res_high, c2) = result[i + j + 1].overflowing_add(high + carry + c1 as u64);
                 result[i + j] = res_low;
+                carry = c1 as u64;
+    
+                let (res_high, c2) = result[i + j + 1].overflowing_add(carry);
                 result[i + j + 1] = res_high;
-                carry = c2;
+                carry = c2 as u64;
             }
         }
-
-        FieldElement256::new([result[0], result[1], result[2], result[3]])
-    }
-
-    pub fn inverse(self) -> FieldElement256 {
-        let mut t = [0u64; 4];
-        let mut new_t = [1u64; 4];
-        let mut r = MODULUS256;
-        let mut new_r = self.value;
-
-        while !is_zero(&new_r) {
-            let q = divide(&r, &new_r); // Divide r by new_r
-            t = subtract(&t, &multiply(&q, &new_t));
-            r = subtract(&r, &multiply(&q, &new_r));
-            std::mem::swap(&mut t, &mut new_t);
-            std::mem::swap(&mut r, &mut new_r);
+    
+        let mut reduced = [0u64; 4];
+        let mut carry = 0u64;
+        for i in 0..4 {
+            let (sum, overflow) = result[i].overflowing_add(carry);
+            reduced[i] = sum;
+            carry = if overflow { 1 } else { 0 };
         }
-
-        assert!(r == [1u64, 0, 0, 0], "Element is not invertible");
-        FieldElement256::new(t)
+    
+        FieldElement256::new(reduced)
     }
 
+    // pub fn inverse(self) -> FieldElement256 {
+    //     let mut t = [0u64; 4];
+    //     let mut new_t = [1u64; 4];
+    //     let mut r = MODULUS256;
+    //     let mut new_r = self.value;
+    
+    //     while !is_zero(&new_r) {
+    //         let q = divide(&r, &new_r); // Divide r by new_r
+    //         t = subtract(&t, &multiply(&q, &new_t));
+    //         r = subtract(&r, &multiply(&q, &new_r));
+    //         std::mem::swap(&mut t, &mut new_t);
+    //         std::mem::swap(&mut r, &mut new_r);
+    //     }
+    
+    //     assert!(r == [1u64, 0, 0, 0], "Element is not invertible");
+    //     FieldElement256::new(t)
+    // }
+    
+    fn is_zero(value: &[u64; 4]) -> bool {
+        value.iter().all(|&x| x == 0)
+    }
+    
     pub fn random() -> Self {
         let mut rng = rand::thread_rng();
         let mut value = [0u64; 4];
         for limb in value.iter_mut() {
             *limb = rng.next_u64();
         }
-
+    
         FieldElement256::new(value)
     }
     
-}
-
-impl Add for FieldElement64 {
-    type Output = Self;
-
-    fn add(self, addend: Self) -> Self::Output {
-        self.add(addend)
-    }
-}
-
-impl Mul for FieldElement64 {
-    type Output = Self;
-
-    fn multiply(self, rhs: Self) -> Self::Output {
-        self.multiply(rhs)
-    }
-}
-
-impl Sub for FieldElement64 {
-    type Output = Self;
-
-    fn subtract(self, rhs: Self) -> Self::Output {
-        self.subtract(rhs)
-    }
 }
