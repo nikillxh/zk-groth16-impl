@@ -12,8 +12,9 @@ pub struct FieldElement256 {
     value: [u64; 4],
 }
 
-pub const MODULUS64: u64 = 0xFFFFFFFFFFFFFFC5; 
+pub const MODULUS64: u64 = 0xFFFFFFFFFFFFFFC5;
 
+#[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub struct FieldElement64 {
     value: u64,
 }
