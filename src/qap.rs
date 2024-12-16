@@ -3,7 +3,7 @@ use std::ops::{Add, Mul, Sub, Rem};
 use crate::field::{FieldElement64, MODULUS64};
 use crate::vector::{i128_to_u64_matrix, i128_to_u64_vec, i64_to_i128_matrix, i64_to_i128_vec, MyVec};
 
-pub struct polynomial {
+pub struct Polynomial {
     roots: FieldElement64,
     constant: FieldElement64,
 }
@@ -13,7 +13,11 @@ pub enum VecVariant<T> {
     MatrixVec(Vec<Vec<T>>),
 }
 
-
+pub struct QAP {
+    A: Vec<FieldElement64>,
+    B: Vec<FieldElement64>,
+    C: Vec<FieldElement64>,
+}
 
 pub fn field_compatible<I64> (input: VecVariant<i64>) -> VecVariant<u64>{
     match input {
