@@ -4,6 +4,7 @@ mod r1cs;
 mod qap;
 mod vector;
 mod field;
+mod trustedsetup;
 
 fn main() {
     let c1 = Constraint::new(Element::new(0, 1), Element::new(1, 1), Element::new(2, 1));

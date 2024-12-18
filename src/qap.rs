@@ -34,6 +34,7 @@ impl QAP {
             t: t_val
         }
     }
+
 }
 
 pub fn falling_factorial(x: FieldElement64, n: u64) -> FieldElement64 {
