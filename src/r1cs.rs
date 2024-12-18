@@ -67,6 +67,18 @@ impl R1CS {
         }
     }
 
+    pub fn left(&self) -> Vec<Vec<i64>> {
+        self.l.clone()
+    }
+
+    pub fn right(&self) -> Vec<Vec<i64>> {
+        self.r.clone()
+    }
+
+    pub fn output(&self) -> Vec<Vec<i64>> {
+        self.o.clone()
+    }
+
     pub fn verify(&self, witness: Vec<i64>) {
         assert_eq!(self.l[0].len(), witness.len(), "Matrix L and witness size mismatch!");
         assert_eq!(self.r[0].len(), witness.len(), "Matrix R and witness size mismatch!");
@@ -82,7 +94,7 @@ impl R1CS {
     }    
 }
 
-fn witness_multiply(matrix: Vec<Vec<i64>>, witness: Vec<i64>) -> Vec<i64>{
+pub fn witness_multiply(matrix: Vec<Vec<i64>>, witness: Vec<i64>) -> Vec<i64>{
     let mut vector: Vec<i64> = vec![];
     for rows in matrix {
         let mut count = 0;

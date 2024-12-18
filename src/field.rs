@@ -76,13 +76,13 @@ impl FieldElement64 {
         self.value
     }
 
-    pub fn convert1D(matrix: &mut Vec<i64>) -> Vec<FieldElement64> {
-        matrix.iter().map(|&x| FieldElement64::new(x as u64)).collect()
+    pub fn convert1D(matrix: &mut Vec<u64>) -> Vec<FieldElement64> {
+        matrix.iter().map(|&x| FieldElement64::new(x)).collect()
     }
 
-    pub fn convert2D(matrix: &mut Vec<Vec<i64>>) -> Vec<Vec<FieldElement64>> {
+    pub fn convert2D(matrix: &mut Vec<Vec<u64>>) -> Vec<Vec<FieldElement64>> {
         matrix.iter()
-        .map(|row| row.iter().map(|&x| FieldElement64::new(x as u64)).collect())
+        .map(|row| row.iter().map(|&x| FieldElement64::new(x)).collect())
         .collect()
     }
 }
