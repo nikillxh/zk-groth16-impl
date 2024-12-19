@@ -1,6 +1,6 @@
 # Groth16 Protocol from Scratch
 
-This project is an implementation of the Groth16 zero-knowledge proof protocol from the ground up. It covers essential cryptographic components such as Rank-1 Constraint Systems (R1CS), Quadratic Arithmetic Programs (QAP), and the trusted setup process for zk-SNARKs.
+An implementation of the Groth16 zero-knowledge proof protocol from the ground up. It covers essential cryptographic components such as Rank-1 Constraint Systems (R1CS), Quadratic Arithmetic Programs (QAP), and the trusted setup process for zk-SNARKs.
 
 ## Key Features
 
