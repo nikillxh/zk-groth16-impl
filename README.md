@@ -10,7 +10,7 @@ An implementation of the Groth16 zero-knowledge proof protocol from the ground u
 - **Trusted Setup**: Implements the setup process using secret randomness and generator functions.
 - **Vector Operations**: Provides vector manipulation functions for cryptographic operations.
 
-## Project Files
+## Files Description
 
 - **r1cs.rs**: Contains the implementation of Rank-1 Constraint Systems (R1CS).
 - **qap.rs**: Converts the R1CS to a Quadratic Arithmetic Program (QAP), which is used for proof generation and verification.
