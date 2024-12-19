@@ -1,19 +1,13 @@
-use std::process::Output;
-use std::ops::{Add, Mul, Sub, Rem};
 use crate::field::{FieldElement64, MODULUS64};
 use crate::vector::{i128_to_u64_matrix, i128_to_u64_vec, i64_to_i128_matrix, i64_to_i128_vec, MyVec};
 use crate::r1cs::{witness_multiply, R1CS};
-
-pub struct Polynomial {
-    roots: FieldElement64,
-    constant: FieldElement64,
-}
 
 pub struct QAP {
     u: Vec<FieldElement64>,
     v: Vec<FieldElement64>,
     w: Vec<FieldElement64>,
     t: u64,
+    h: Vec<FieldElement64>,
 }
 
 impl QAP {
@@ -21,20 +15,94 @@ impl QAP {
         let mut l_vec = witness_multiply(r1cs.left(), witness.clone());
         let mut r_vec = witness_multiply(r1cs.right(), witness.clone());
         let mut o_vec = witness_multiply(r1cs.output(), witness.clone());
-        
-        let left = FieldElement64::convert1D(&mut field_compatible_vector(&mut l_vec));
-        let right = FieldElement64::convert1D(&mut field_compatible_vector(&mut r_vec));
-        let output = FieldElement64::convert1D(&mut field_compatible_vector(&mut o_vec));
-        let t_val = output.len() as u64;
+        let t_val = o_vec.len();
+
+        let t_poly = generate_t(t_val);
+        let uv = multiply_polynomials(&l_vec, &r_vec);
+        let uvw = subtract_polynomials(&uv, &o_vec);
+        let (mut h, _) = divide_polynomials(&uvw, &t_poly);
+                
+        let left = FieldElement64::convert1d(&mut field_compatible_vector(&mut l_vec));
+        let right = FieldElement64::convert1d(&mut field_compatible_vector(&mut r_vec));
+        let output = FieldElement64::convert1d(&mut field_compatible_vector(&mut o_vec));
+        let h_vec = FieldElement64::convert1d(&mut field_compatible_vector(&mut h));
+
+        println!("QAP from R1CS done!");
 
         Self {
             u: left,
             v: right,
             w: output,
-            t: t_val
+            t: t_val as u64,
+            h: h_vec,
+        }
+
+    }
+
+    // Prover
+    pub fn evaluate(&self, srs_values: [Vec<FieldElement64>; 3]) -> [FieldElement64; 3] {
+        let a1 = inner_product(&self.u, &srs_values[0]).unwrap();
+        let b2 = inner_product(&self.v, &srs_values[1]).unwrap();
+        let c1 =  inner_product(&self.w, &srs_values[0]).unwrap() + inner_product(&self.h, &srs_values[2]).unwrap();
+
+        [a1, b2, c1]
+    }
+
+    // Verifier
+    pub fn verify(prover: [FieldElement64; 3], srs_values: [Vec<FieldElement64>; 3]) -> () {
+        assert_eq!(prover[0] * prover[1], prover[2] * srs_values[1][0]);
+    }
+
+    pub fn t_val(&self) -> u64 {
+        self.t
+    }
+}
+
+// Polynomial operations
+
+fn generate_t(n: usize) -> Vec<i64> {
+    let mut t = vec![1];
+    for i in 1..=n {
+        t = multiply_polynomials(&t, &vec![-(i as i64), 1]);
+    }
+    t
+}
+
+fn multiply_polynomials(a: &Vec<i64>, b: &Vec<i64>) -> Vec<i64> {
+    let mut result = vec![0; a.len() + b.len() - 1];
+    for (i, &coeff_a) in a.iter().enumerate() {
+        for (j, &coeff_b) in b.iter().enumerate() {
+            result[i + j] += coeff_a * coeff_b;
+        }
+    }
+    result
+}
+
+fn subtract_polynomials(a: &Vec<i64>, b: &Vec<i64>) -> Vec<i64> {
+    let max_len = a.len().max(b.len());
+    let mut result = vec![0; max_len];
+    for i in 0..max_len {
+        let coeff_a = *a.get(i).unwrap_or(&0);
+        let coeff_b = *b.get(i).unwrap_or(&0);
+        result[i] = coeff_a - coeff_b;
+    }
+    result
+}
+
+fn divide_polynomials(dividend: &Vec<i64>, divisor: &Vec<i64>) -> (Vec<i64>, Vec<i64>) {
+    let mut quotient = vec![0; dividend.len().saturating_sub(divisor.len()) + 1];
+    let mut remainder = dividend.clone();
+
+    for i in (0..=dividend.len().saturating_sub(divisor.len())).rev() {
+        let lead_coeff = remainder[i + divisor.len() - 1] / divisor[divisor.len() - 1];
+        quotient[i] = lead_coeff;
+
+        for j in 0..divisor.len() {
+            remainder[i + j] -= lead_coeff * divisor[j];
         }
     }
 
+    (quotient, remainder)
 }
 
 pub fn falling_factorial(x: FieldElement64, n: u64) -> FieldElement64 {

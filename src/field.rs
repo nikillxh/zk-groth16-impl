@@ -76,11 +76,11 @@ impl FieldElement64 {
         self.value
     }
 
-    pub fn convert1D(matrix: &mut Vec<u64>) -> Vec<FieldElement64> {
+    pub fn convert1d(matrix: &mut Vec<u64>) -> Vec<FieldElement64> {
         matrix.iter().map(|&x| FieldElement64::new(x)).collect()
     }
 
-    pub fn convert2D(matrix: &mut Vec<Vec<u64>>) -> Vec<Vec<FieldElement64>> {
+    pub fn convert2d(matrix: &mut Vec<Vec<u64>>) -> Vec<Vec<FieldElement64>> {
         matrix.iter()
         .map(|row| row.iter().map(|&x| FieldElement64::new(x)).collect())
         .collect()
@@ -206,24 +206,6 @@ impl FieldElement256 {
     
         FieldElement256::new(reduced)
     }
-
-    // pub fn inverse(self) -> FieldElement256 {
-    //     let mut t = [0u64; 4];
-    //     let mut new_t = [1u64; 4];
-    //     let mut r = MODULUS256;
-    //     let mut new_r = self.value;
-    
-    //     while !is_zero(&new_r) {
-    //         let q = divide(&r, &new_r); // Divide r by new_r
-    //         t = subtract(&t, &multiply(&q, &new_t));
-    //         r = subtract(&r, &multiply(&q, &new_r));
-    //         std::mem::swap(&mut t, &mut new_t);
-    //         std::mem::swap(&mut r, &mut new_r);
-    //     }
-    
-    //     assert!(r == [1u64, 0, 0, 0], "Element is not invertible");
-    //     FieldElement256::new(t)
-    // }
     
     fn is_zero(value: &[u64; 4]) -> bool {
         value.iter().all(|&x| x == 0)
