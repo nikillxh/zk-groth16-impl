@@ -19,7 +19,7 @@ An implementation of the Groth16 zero-knowledge proof protocol from the ground u
 - **vector.rs**: Contains helper functions for vector operations in cryptographic contexts.
 - **main.rs**: Demonstrates how to create R1CS constraints, convert them to QAP, and generate and verify proofs.
 
-## How It Works
+## Mechanism
 
 1. **Define Constraints (R1CS)**: First, constraints are defined using `Element` and `Constraint` in the `main.rs` file.
 2. **Convert to QAP**: These constraints are then transformed into a QAP, representing them as quadratic equations.
