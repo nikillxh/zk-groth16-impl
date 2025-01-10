@@ -37,3 +37,10 @@ To run the example:
     ```bash
     cargo run
 The example will define some constraints, convert them into a QAP, generate a trusted setup, and evaluate the proof. Finally, it will verify if the proof is valid.
+
+## References
+Rareskills ZK-Book: https://www.rareskills.io/zk-book
+Bulletproofs: https://eprint.iacr.org/2016/260.pdf
+
+## License
+This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
