@@ -1,6 +1,6 @@
 # Groth16 Protocol from Scratch
 
-This project is an implementation of the Groth16 zero-knowledge proof protocol from the ground up. It covers essential cryptographic components such as Rank-1 Constraint Systems (R1CS), Quadratic Arithmetic Programs (QAP), and the trusted setup process for zk-SNARKs.
+An implementation of the Groth16 zero-knowledge proof protocol from the ground up. It covers essential cryptographic components such as Rank-1 Constraint Systems (R1CS), Quadratic Arithmetic Programs (QAP), and the trusted setup process for zk-SNARKs.
 
 ## Key Features
 
@@ -10,7 +10,7 @@ This project is an implementation of the Groth16 zero-knowledge proof protocol f
 - **Trusted Setup**: Implements the setup process using secret randomness and generator functions.
 - **Vector Operations**: Provides vector manipulation functions for cryptographic operations.
 
-## Project Files
+## Files Description
 
 - **r1cs.rs**: Contains the implementation of Rank-1 Constraint Systems (R1CS).
 - **qap.rs**: Converts the R1CS to a Quadratic Arithmetic Program (QAP), which is used for proof generation and verification.
@@ -19,7 +19,7 @@ This project is an implementation of the Groth16 zero-knowledge proof protocol f
 - **vector.rs**: Contains helper functions for vector operations in cryptographic contexts.
 - **main.rs**: Demonstrates how to create R1CS constraints, convert them to QAP, and generate and verify proofs.
 
-## How It Works
+## Mechanism
 
 1. **Define Constraints (R1CS)**: First, constraints are defined using `Element` and `Constraint` in the `main.rs` file.
 2. **Convert to QAP**: These constraints are then transformed into a QAP, representing them as quadratic equations.
@@ -37,10 +37,3 @@ To run the example:
     ```bash
     cargo run
 The example will define some constraints, convert them into a QAP, generate a trusted setup, and evaluate the proof. Finally, it will verify if the proof is valid.
-
-## References
-Rareskills ZK-Book: https://www.rareskills.io/zk-book
-Groth16 Paper: https://eprint.iacr.org/2016/260.pdf
-
-## License
-This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
