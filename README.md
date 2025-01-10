@@ -40,7 +40,7 @@ The example will define some constraints, convert them into a QAP, generate a tr
 
 ## References
 Rareskills ZK-Book: https://www.rareskills.io/zk-book
-Bulletproofs: https://eprint.iacr.org/2016/260.pdf
+Groth16 Paper: https://eprint.iacr.org/2016/260.pdf
 
 ## License
 This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
